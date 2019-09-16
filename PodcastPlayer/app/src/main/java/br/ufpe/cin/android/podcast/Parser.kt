@@ -1,5 +1,6 @@
 package br.ufpe.cin.android.podcast
 
+import android.util.Log
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlPullParserFactory
@@ -100,6 +101,7 @@ object Parser {
         var pubDate: String? = null
         var description: String? = null
         var downloadLink: String? = null
+        var imageUrl: String? = null
         parser.require(XmlPullParser.START_TAG, null, "item")
         while (parser.next() != XmlPullParser.END_TAG) {
             if (parser.eventType != XmlPullParser.START_TAG) {
@@ -117,11 +119,14 @@ object Parser {
             } else if (name == "enclosure") {
                 downloadLink = parser.getAttributeValue(null, "url")
                 skip(parser)
+            } else if (name == "itunes:image") {
+                imageUrl = parser.getAttributeValue(null, "href")
+                skip(parser)
             } else {
                 skip(parser)
             }
         }
-        return ItemFeed(title!!, link!!, pubDate!!, description!!, downloadLink!!)
+        return ItemFeed(title!!, link!!, pubDate!!, description!!, downloadLink!!, imageUrl?:imageUrl!!)
     }
 
     // Processa tags de forma parametrizada no feed.
