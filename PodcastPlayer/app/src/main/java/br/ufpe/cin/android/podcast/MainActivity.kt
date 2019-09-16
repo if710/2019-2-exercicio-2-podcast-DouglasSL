@@ -18,18 +18,20 @@ class MainActivity : AppCompatActivity() {
         list.adapter = ItemFeedAdapter(listOf<ItemFeed>(), this)
 
         doAsync {
+            val db = ItemFeedDatabase.getDatabase(applicationContext)
+            var itemFeedList = listOf<ItemFeed>()
+
             try {
                 var xml = URL("https://s3-us-west-1.amazonaws.com/podcasts.thepolyglotdeveloper.com/podcast.xml").readText()
-                var itemFeedList = Parser.parse(xml)
-
-                val db = ItemFeedDatabase.getDatabase(applicationContext)
+                itemFeedList = Parser.parse(xml)
                 db.itemFeedDao().addAll(itemFeedList)
-
-                uiThread {
-                    list.adapter = ItemFeedAdapter(itemFeedList, applicationContext)
-                }
             } catch (e: Throwable) {
-                Log.w("ERROR", e.message.toString())
+                Log.e("ERROR", e.message.toString())
+                itemFeedList = db.itemFeedDao().all()
+            }
+
+            uiThread {
+                list.adapter = ItemFeedAdapter(itemFeedList, applicationContext)
             }
         }
     }
