@@ -19,14 +19,15 @@ class MainActivity : AppCompatActivity() {
 
         doAsync {
             try {
-                var xml =
-                    URL("https://s3-us-west-1.amazonaws.com/podcasts.thepolyglotdeveloper.com/podcast.xml").readText()
+                var xml = URL("https://s3-us-west-1.amazonaws.com/podcasts.thepolyglotdeveloper.com/podcast.xml").readText()
                 var itemFeedList = Parser.parse(xml)
+
+                val db = ItemFeedDatabase.getDatabase(applicationContext)
+                db.itemFeedDao().addAll(itemFeedList)
 
                 uiThread {
                     list.adapter = ItemFeedAdapter(itemFeedList, applicationContext)
                 }
-
             } catch (e: Throwable) {
                 Log.w("ERROR", e.message.toString())
             }
